@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VERTEX AXIOMA® - Verificación Catastral y Geodesia 4.0</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts: JetBrains Mono & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        axioma: {
+                            bg: '#0B0F19',
+                            panel: '#111827',
+                            card: '#1F2937',
+                            border: '#374151',
+                            green: '#10B981',
+                            greenDark: '#059669',
+                            cyan: '#06B6D4',
+                            amber: '#F59E0B',
+                            red: '#EF4444',
+                            purple: '#8B5CF6'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0B0F19;
+            color: #E5E7EB;
+            font-family: 'Inter', sans-serif;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.08) 0%, transparent 60%),
+                radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
+                linear-gradient(rgba(17, 24, 39, 0.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(17, 24, 39, 0.4) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Custom cybernetic border & glow effects */
+        .cyber-panel {
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(55, 65, 81, 0.8);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+        }
+
+        .cyber-panel-cyan {
+            border-color: rgba(6, 182, 212, 0.4);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+        }
+
+        .cyber-panel-green {
+            border-color: rgba(16, 185, 129, 0.4);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+        }
+
+        /* Scanline Overlay Effect */
+        .scanlines {
+            position: relative;
+            overflow: hidden;
+        }
+        .scanlines::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 20;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B0F19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #06B6D4;
+        }
+
+        /* Radar Scanner Animation */
+        @keyframes radarRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .radar-sweep {
+            animation: radarRotate 4s linear infinite;
+        }
+
+        /* Pulse glow animation */
+        @keyframes cyberPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+        .cyber-pulse {
+            animation: cyberPulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 md:p-6 text-xs md:text-sm">
+
+    <!-- ENCABEZADO INSTITUCIONAL -->
+    <header class="w-full max-w-7xl mx-auto mb-6 cyber-panel rounded-xl p-4 border-l-4 border-l-axioma-cyan flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div class="flex items-center gap-3.5">
+            <div class="h-11 w-11 rounded-lg bg-axioma-cyan/10 border border-axioma-cyan flex items-center justify-center text-axioma-cyan text-2xl font-black font-mono">
+                VA
+            </div>
+            <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h1 class="font-mono font-extrabold text-base md:text-lg tracking-wider text-white">VERTEX AXIOMA®</h1>
+                    <span class="px-2 py-0.5 text-[10px] font-mono bg-axioma-cyan/20 text-axioma-cyan border border-axioma-cyan/40 rounded font-semibold">ESTÁNDAR 4.0</span>
+                    <span class="px-2 py-0.5 text-[10px] font-mono bg-axioma-green/20 text-axioma-green border border-axioma-green/40 rounded font-semibold">CATASTRO & GEODESIA</span>
+                </div>
+                <p class="text-xs text-gray-400 font-mono mt-0.5">Oráculo e Infraestructura Horizontal de Gobernanza e Integridad Forense 4.0</p>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 font-mono text-xs w-full lg:w-auto justify-start lg:justify-end">
+            <div class="bg-black/50 px-3 py-1.5 rounded-lg border border-slate-700/80 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-axioma-green animate-pulse"></span>
+                <span class="text-gray-400">NODO VALIDADOR:</span>
+                <span class="text-white font-bold">FONDO INNOVA #04</span>
+            </div>
+            <div class="bg-black/50 px-3 py-1.5 rounded-lg border border-slate-700/80">
+                <span class="text-gray-400">TRIPLE VERIFICACIÓN:</span>
+                <span class="text-axioma-cyan font-bold ml-1">OPERATIVA</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- BANNER DE IDENTIFICACIÓN DE CAPA -->
+    <div class="w-full max-w-7xl mx-auto mb-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-700/80 p-3.5 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-2 font-mono">
+        <div class="flex items-center gap-2 text-axioma-green">
+            <i class="fa-solid fa-layer-group text-base"></i>
+            <span class="font-bold tracking-wide">CAPA III: ACTIVOS REALES E INDUSTRIAS CRÍTICAS</span>
+            <span class="text-gray-500">|</span>
+            <span class="text-gray-300">Módulo Consorcio 4.0 & Auditoría Inmobiliaria</span>
+        </div>
+        <div class="text-xs text-gray-400">
+            EVALUACIÓN DE MENSURAS OFICIALES & SAN JUAN 4.0
+        </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL / GRID DE CONTROL -->
+    <main class="w-full max-w-7xl mx-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- COLUMNA IZQUIERDA: INGESTA DE PLANO & CRIPTOGRAFÍA MERKLE (4 COLS) -->
+        <section class="lg:col-span-4 space-y-6 flex flex-col">
+
+            <!-- SELECTOR / DRAG & DROP DE PLANO -->
+            <div class="cyber-panel p-5 rounded-xl space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                    <h2 class="font-mono font-bold text-white text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-file-pdf text-axioma-cyan"></i> Ingesta de Plano & Mensura
+                    </h2>
+                    <span class="text-[10px] font-mono text-gray-400">Directo Geodesia</span>
+                </div>
+
+                <!-- Dropzone Box -->
+                <div id="dropZone" onclick="document.getElementById('fileInput').click()" class="border-2 border-dashed border-slate-700 hover:border-axioma-cyan rounded-xl p-5 text-center cursor-pointer bg-slate-900/60 transition-all hover:bg-slate-900 group relative overflow-hidden">
+                    <input type="file" id="fileInput" class="hidden" accept=".pdf,.dwg,.dxf" onchange="handleFileSelect(event)">
+                    
+                    <div id="uploadPrompt" class="space-y-2">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-axioma-cyan/10 border border-axioma-cyan/30 flex items-center justify-center text-axioma-cyan group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
+                        </div>
+                        <p class="font-mono text-xs font-semibold text-white">Arrastre o seleccione Plano de Mensura</p>
+                        <p class="text-[11px] text-gray-400">PDF Oficial San Juan / Geodesia PBA / CAD Vectorial</p>
+                    </div>
+
+                    <div id="selectedFileInfo" class="hidden text-left space-y-2">
+                        <div class="flex items-center justify-between bg-black/60 p-2.5 rounded border border-axioma-cyan/50">
+                            <div class="truncate">
+                                <div id="fileName" class="font-mono font-bold text-white text-xs truncate">Plano_SanJuan_Geodesia_2026.pdf</div>
+                                <div id="fileSize" class="text-[10px] text-gray-400 font-mono">5.24 MB | Hash de Origen Listo</div>
+                            </div>
+                            <span class="px-2 py-0.5 bg-axioma-green/20 text-axioma-green text-[10px] font-mono rounded border border-axioma-green/40">Cargado</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selector de Casos Preconfigurados -->
+                <div>
+                    <label class="font-mono text-[11px] text-gray-400 block mb-1">Cargar Expediente Modelo:</label>
+                    <select id="caseSelector" onchange="loadCaseStudy()" class="w-full bg-slate-900 border border-slate-700 text-white font-mono text-xs p-2.5 rounded-lg focus:border-axioma-cyan outline-none">
+                        <option value="sanjuan">San Juan - Mensura N° 18-5492-2026 (Foro Abogados)</option>
+                        <option value="pba_alerta">PBA - Consorcio M-202 (Desvío Superficial Detectado)</option>
+                        <option value="caba_ph">CABA - Plano Final Obra PH #8821 (Aprobado)</option>
+                    </select>
+                </div>
+
+                <button onclick="executeVerification()" class="w-full py-3 bg-gradient-to-r from-axioma-cyan to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-mono font-extrabold text-xs rounded-lg transition-all shadow-lg shadow-axioma-cyan/20 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-bolt"></i> INICIAR PERITAJE FORENSE 4.0
+                </button>
+            </div>
+
+            <!-- PANEL CRIPTOGRÁFICO SHA-256 & MERKLE TREE -->
+            <div class="cyber-panel p-5 rounded-xl space-y-4 flex-1">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                    <h3 class="font-mono font-bold text-white text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-key text-axioma-green"></i> Criptografía & DNA Digital
+                    </h3>
+                    <span class="text-[10px] font-mono bg-axioma-green/10 text-axioma-green border border-axioma-green/30 px-1.5 py-0.5 rounded">SHA-256</span>
+                </div>
+
+                <div class="space-y-3 font-mono text-xs">
+                    <div>
+                        <span class="text-gray-400 block text-[11px] mb-1">Hash de Origen (Digest PDF/Vector):</span>
+                        <div id="sha256Digest" class="p-2.5 bg-black/80 rounded border border-slate-800 text-axioma-cyan text-[11px] break-all leading-tight">
+                            0x8f4c2e91a0b3f81e7d4c5b6a7f8e9d0c1b2a3f4e5d6c7b8a9f0e1d2c3b4a5f6e
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="text-gray-400 block text-[11px] mb-1">Raíz de Árbol de Merkle (Consorcio Ledger):</span>
+                        <div id="merkleRoot" class="p-2.5 bg-black/80 rounded border border-slate-800 text-axioma-green text-[11px] break-all leading-tight">
+                            0x3a9f8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800 space-y-1.5">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Estado de Anclaje:</span>
+                            <span id="ledgerState" class="text-axioma-green font-bold">PETRIFICADO</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Timestamp Criptográfico:</span>
+                            <span id="timestampVal" class="text-gray-200">2026-10-20 13:20:00 UTC</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Inmutabilidad:</span>
+                            <span class="text-axioma-cyan font-bold">Transfronteriza</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- COLUMNA CENTRAL/DERECHA: AUDITORÍA GEOESPACIAL, COMPARADOR GEMELO DIGITAL & DECISIÓN (8 COLS) -->
+        <section class="lg:col-span-8 space-y-6 flex flex-col">
+
+            <!-- PANEL DE GEORREFERENCIACIÓN Y CATASTRO -->
+            <div class="cyber-panel p-5 rounded-xl space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                    <h2 class="font-mono font-bold text-white text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-map-location-dot text-axioma-cyan"></i> Auditoría Geoespacial & Matriz de Límites (POSGAR 07)
+                    </h2>
+                    <span class="px-2 py-0.5 bg-black/60 text-axioma-cyan border border-axioma-cyan/30 rounded text-[10px] font-mono">Geodesia Oficial</span>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono text-xs">
+                    <div class="bg-black/50 p-2.5 rounded-lg border border-slate-800">
+                        <span class="text-gray-400 block text-[10px]">Latitud (POSGAR 07):</span>
+                        <span id="geoLat" class="text-white font-bold text-sm">-31.537500°</span>
+                    </div>
+                    <div class="bg-black/50 p-2.5 rounded-lg border border-slate-800">
+                        <span class="text-gray-400 block text-[10px]">Longitud (POSGAR 07):</span>
+                        <span id="geoLng" class="text-white font-bold text-sm">-68.536389°</span>
+                    </div>
+                    <div class="bg-black/50 p-2.5 rounded-lg border border-slate-800">
+                        <span class="text-gray-400 block text-[10px]">Cota Ortométrica:</span>
+                        <span id="geoCota" class="text-axioma-cyan font-bold text-sm">650.20 msnm</span>
+                    </div>
+                    <div class="bg-black/50 p-2.5 rounded-lg border border-slate-800">
+                        <span class="text-gray-400 block text-[10px]">Superficie Aprobada:</span>
+                        <span id="geoSup" class="text-axioma-green font-bold text-sm">2,840.50 m²</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono text-xs pt-1">
+                    <div class="flex justify-between bg-slate-900/60 p-2 rounded border border-slate-800">
+                        <span class="text-gray-400">Expediente:</span>
+                        <span id="expNum" class="text-white">EXP-SJ-2026-0941</span>
+                    </div>
+                    <div class="flex justify-between bg-slate-900/60 p-2 rounded border border-slate-800">
+                        <span class="text-gray-400">Profesional:</span>
+                        <span id="profName" class="text-axioma-cyan">Ing. R. Gómez (MP #4092)</span>
+                    </div>
+                    <div class="flex justify-between bg-slate-900/60 p-2 rounded border border-slate-800">
+                        <span class="text-gray-400">Validación QR:</span>
+                        <span id="qrStatus" class="text-axioma-green font-bold">Verificada en Origen</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPARADOR VISUAL DE GEMELO DIGITAL (PLANO CATASTRAL vs. RELEVAMIENTO 3DGS) -->
+            <div class="cyber-panel p-5 rounded-xl space-y-4 flex-1 flex flex-col justify-between">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                    <h2 class="font-mono font-bold text-white text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-draw-polygon text-axioma-purple"></i> Visualizador Forense: Plano Aprobado vs. Gemelo Digital 3DGS
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <span id="anomalyBadge" class="px-2.5 py-1 bg-axioma-green/20 text-axioma-green border border-axioma-green/40 rounded text-xs font-mono font-bold">
+                            Desviación: 0.00%
+                        </span>
+                    </div>
+                </div>
+
+                <!-- CANVAS / RASTER VISUALIZER -->
+                <div class="w-full h-64 md:h-72 bg-slate-950 rounded-xl border border-slate-800 relative flex items-center justify-center overflow-hidden scanlines">
+                    
+                    <!-- Blueprint Grid lines -->
+                    <div class="absolute inset-0 opacity-15" style="background-image: radial-gradient(#06B6D4 1px, transparent 1px); background-size: 20px 20px;"></div>
+
+                    <!-- SVG Canvas comparison -->
+                    <svg id="blueprintSvg" class="w-full h-full p-4 relative z-10" viewBox="0 0 500 250">
+                        <!-- Blueprint Cadastral Boundaries (Cyan dashed) -->
+                        <rect x="60" y="40" width="380" height="170" fill="none" stroke="#06B6D4" stroke-width="2" stroke-dasharray="6 3"/>
+                        <text x="70" y="58" fill="#06B6D4" font-size="10" font-family="JetBrains Mono">Límite Catastral Oficial (Plano de Mensura San Juan)</text>
+
+                        <!-- Gemelo Digital 3DGS Overlay (Dynamic color/size) -->
+                        <rect id="buildingFootprint" x="75" y="55" width="350" height="140" fill="rgba(16, 185, 129, 0.12)" stroke="#10B981" stroke-width="2.5"/>
+                        <text id="footprintText" x="85" y="80" fill="#10B981" font-size="11" font-family="JetBrains Mono" font-weight="bold">Relevamiento Físico Telemétrico (3DGS): 100% Coincidente</text>
+
+                        <!-- Crosshair Overlay -->
+                        <line x1="250" y1="20" x2="250" y2="230" stroke="#8B5CF6" stroke-width="1" opacity="0.3"/>
+                        <line x1="40" y1="125" x2="460" y2="125" stroke="#8B5CF6" stroke-width="1" opacity="0.3"/>
+                    </svg>
+
+                    <!-- Radar Sweep -->
+                    <div class="absolute w-72 h-72 border border-axioma-cyan/20 rounded-full radar-sweep pointer-events-none opacity-20"></div>
+
+                    <!-- Overlay Specs -->
+                    <div class="absolute bottom-3 left-3 bg-black/80 px-2.5 py-1 rounded border border-slate-800 text-[10px] font-mono text-gray-400">
+                        Capa Activa: <span class="text-axioma-cyan font-bold">Mapeo Lidar & Fotogrametría v4.0</span>
+                    </div>
+                </div>
+
+                <!-- DIAGNÓSTICO FORENSE DE VICIO DE OBRA -->
+                <div id="diagnosticPanel" class="p-3.5 bg-slate-900/90 rounded-lg border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 font-mono">
+                    <div>
+                        <span class="text-gray-400 block text-[10px]">DIAGNÓSTICO DE INTEGRIDAD CONSTRUCTIVA:</span>
+                        <div id="diagnosticMsg" class="text-axioma-green font-bold text-xs flex items-center gap-2 mt-0.5">
+                            <i class="fa-solid fa-shield-check"></i> Plano alineado sin invasión de límites ni vicios de mensura.
+                        </div>
+                    </div>
+                    <div class="text-left md:text-right">
+                        <span class="text-gray-400 block text-[10px]">EVALUACIÓN RIESGO CATASTRAL:</span>
+                        <span id="riskScore" class="text-axioma-green font-extrabold text-xs bg-emerald-950/80 px-2 py-0.5 rounded border border-axioma-green/40">
+                            RIESGO NULO (0.0 / 10)
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONSOLA DE DECISIÓN DE INVERSIÓN PARA ANALISTAS FONDO INNOVA -->
+            <div class="cyber-panel p-5 rounded-xl border-t-2 border-t-axioma-cyan space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                    <h2 class="font-mono font-bold text-white text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-gavel text-axioma-amber"></i> Consola de Evaluación para Analistas - Fondo Innova
+                    </h2>
+                    <span class="text-[10px] font-mono text-gray-400">Emitir Dictamen de Inversión</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button onclick="approveInvestment()" class="py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-axioma-green hover:from-emerald-500 hover:to-green-400 text-black font-mono font-extrabold text-xs rounded-lg transition-all shadow-lg shadow-axioma-green/20 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-check text-base"></i> APROBAR DICTAMEN DE INVERSIÓN
+                    </button>
+
+                    <button onclick="rejectInvestment()" class="py-3.5 px-4 bg-gradient-to-r from-red-700 to-axioma-red hover:from-red-600 hover:to-red-400 text-white font-mono font-extrabold text-xs rounded-lg transition-all shadow-lg shadow-axioma-red/20 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-xmark text-base"></i> RECHAZAR POR RIESGO CATASTRAL
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- FOOTER INSTITUCIONAL -->
+    <footer class="w-full max-w-7xl mx-auto mt-6 pt-4 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-2 text-xs font-mono text-gray-500">
+        <div>VERTEX AXIOMA S.A.S. ® 2026 | Infraestructura Horizontal de Gobernanza & Integridad Forense</div>
+        <div class="flex items-center gap-4">
+            <span>Sello: <span class="text-axioma-green font-bold">Transfronterizo Activo</span></span>
+            <span>Hash Global: <span class="text-axioma-cyan">0xbc16...f3cd</span></span>
+        </div>
+    </footer>
+
+
+    <!-- ========================================================================= -->
+    <!-- MODAL DE CERTIFICADO DE PRUEBA PETRIFICADA -->
+    <!-- ========================================================================= -->
+    <div id="certModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="cyber-panel cyber-panel-green w-full max-w-2xl rounded-2xl p-6 space-y-5 scanlines relative overflow-hidden">
+            
+            <div class="flex justify-between items-start border-b border-slate-700 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-axioma-green/20 border border-axioma-green flex items-center justify-center text-axioma-green text-xl">
+                        <i class="fa-solid fa-certificate"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-mono font-bold text-white text-base">CERTIFICADO DE PRUEBA PETRIFICADA</h3>
+                        <p class="font-mono text-xs text-axioma-cyan">Sello de Inmutabilidad Transfronteriza 4.0</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="certBody" class="space-y-3 font-mono text-xs bg-slate-950 p-4 rounded-xl border border-slate-800">
+                <!-- Dynamic Modal Content -->
+            </div>
+
+            <div class="flex justify-between items-center pt-2">
+                <span class="text-[10px] font-mono text-gray-500">VERTEX AXIOMA® Ledger ID: #2026-INV-8821</span>
+                <button onclick="closeModal()" class="py-2 px-5 bg-slate-800 hover:bg-slate-700 text-white font-mono text-xs font-bold rounded-lg border border-slate-700">
+                    Cerrar Certificado
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- NOTIFICACIÓN TOAST -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl border border-axioma-cyan shadow-2xl hidden flex items-center gap-3 z-50 text-xs font-mono">
+        <i class="fa-solid fa-circle-info text-axioma-cyan text-base"></i>
+        <span id="toastMsg">Notificación del sistema...</span>
+    </div>
+
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Casos de Estudio Preconfigurados
+        const cases = {
+            sanjuan: {
+                fileName: "Plano_SanJuan_Geodesia_2026.pdf",
+                fileSize: "5.24 MB | Verificación Convenio Abogados",
+                sha256: "0x8f4c2e91a0b3f81e7d4c5b6a7f8e9d0c1b2a3f4e5d6c7b8a9f0e1d2c3b4a5f6e",
+                merkle: "0x3a9f8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a",
+                lat: "-31.537500°",
+                lng: "-68.536389°",
+                cota: "650.20 msnm",
+                sup: "2,840.50 m²",
+                exp: "EXP-SJ-2026-0941",
+                prof: "Ing. R. Gómez (MP #4092)",
+                qr: "Verificada en Origen",
+                anomalyText: "Desviación: 0.00%",
+                anomalyClass: "bg-axioma-green/20 text-axioma-green border-axioma-green/40",
+                diagText: "Plano alineado sin invasión de límites ni vicios de mensura.",
+                diagClass: "text-axioma-green",
+                riskText: "RIESGO NULO (0.0 / 10)",
+                riskClass: "bg-emerald-950/80 border-axioma-green/40 text-axioma-green",
+                svgBox: { x: 75, y: 55, width: 350, height: 140, stroke: "#10B981", fill: "rgba(16, 185, 129, 0.12)" },
+                svgText: "Relevamiento Físico Telemétrico (3DGS): 100% Coincidente"
+            },
+            pba_alerta: {
+                fileName: "PBA_Consorcio_M202_Invasión.dwg",
+                fileSize: "8.12 MB | Cadastral Provincia Buenos Aires",
+                sha256: "0x7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b",
+                merkle: "0x9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e",
+                lat: "-34.599722°",
+                lng: "-58.381944°",
+                cota: "24.50 msnm",
+                sup: "3,120.00 m²",
+                exp: "EX-2026-883921-GDEBA",
+                prof: "Agrim. M. Fernández (CPA #10492)",
+                qr: "Observada con Modificaciones",
+                anomalyText: "ALERTA: Desviación +4.85%",
+                anomalyClass: "bg-axioma-red/20 text-axioma-red border-axioma-red/40",
+                diagText: "CRÍTICO: Exceso de edificación sobre retiro de frente e invasión de parcela linderos.",
+                diagClass: "text-axioma-red",
+                riskText: "RIESGO ALTO (8.9 / 10)",
+                riskClass: "bg-red-950/80 border-axioma-red/40 text-axioma-red",
+                svgBox: { x: 65, y: 45, width: 375, height: 160, stroke: "#EF4444", fill: "rgba(239, 68, 68, 0.18)" },
+                svgText: "DESVÍO DETECTADO: Invasión de Límite Catastral (+4.85%)"
+            },
+            caba_ph: {
+                fileName: "CABA_PH_FinalObra_8821.pdf",
+                fileSize: "3.90 MB | Registro GCABA Propiedad Horizontal",
+                sha256: "0x1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c",
+                merkle: "0x5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c",
+                lat: "-34.603722°",
+                lng: "-58.381592°",
+                cota: "30.10 msnm",
+                sup: "1,950.80 m²",
+                exp: "EX-2026-110293-GCABA",
+                prof: "Arq. L. Benítez (CPAU #18332)",
+                qr: "Verificada en Origen",
+                anomalyText: "Desviación: 0.00%",
+                anomalyClass: "bg-axioma-green/20 text-axioma-green border-axioma-green/40",
+                diagText: "Plano verificado conforme a obra en Gemelo Digital 3DGS.",
+                diagClass: "text-axioma-green",
+                riskText: "RIESGO NULO (0.0 / 10)",
+                riskClass: "bg-emerald-950/80 border-axioma-green/40 text-axioma-green",
+                svgBox: { x: 75, y: 55, width: 350, height: 140, stroke: "#10B981", fill: "rgba(16, 185, 129, 0.12)" },
+                svgText: "Relevamiento Físico Telemétrico (3DGS): 100% Coincidente"
+            }
+        };
+
+        // Manejo de carga de archivos
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('uploadPrompt').classList.add('hidden');
+                document.getElementById('selectedFileInfo').classList.remove('hidden');
+                document.getElementById('fileName').innerText = file.name;
+                document.getElementById('fileSize').innerText = (file.size / (1024 * 1024)).toFixed(2) + " MB | Hash Ingestado";
+                
+                showToast("Plano ingresado. Listo para ejecutar peritaje criptográfico.");
+            }
+        }
+
+        // Carga de caso preconfigurado
+        function loadCaseStudy() {
+            const selected = document.getElementById('caseSelector').value;
+            const data = cases[selected];
+
+            document.getElementById('uploadPrompt').classList.add('hidden');
+            document.getElementById('selectedFileInfo').classList.remove('hidden');
+            document.getElementById('fileName').innerText = data.fileName;
+            document.getElementById('fileSize').innerText = data.fileSize;
+
+            updateDOMWithCaseData(data);
+            showToast("Caso de estudio " + selected.toUpperCase() + " cargado.");
+        }
+
+        // Simulación de verificación criptográfica
+        function executeVerification() {
+            showToast("Calculando Árbol de Merkle y contrastando con Gemelo Digital 3DGS...");
+            
+            const selected = document.getElementById('caseSelector').value;
+            const data = cases[selected];
+
+            setTimeout(() => {
+                updateDOMWithCaseData(data);
+                showToast("Peritaje Forense Catastral 4.0 Finalizado.");
+            }, 600);
+        }
+
+        // Actualizar interfaz según datos del caso
+        function updateDOMWithCaseData(data) {
+            document.getElementById('sha256Digest').innerText = data.sha256;
+            document.getElementById('merkleRoot').innerText = data.merkle;
+            document.getElementById('geoLat').innerText = data.lat;
+            document.getElementById('geoLng').innerText = data.lng;
+            document.getElementById('geoCota').innerText = data.cota;
+            document.getElementById('geoSup').innerText = data.sup;
+            document.getElementById('expNum').innerText = data.exp;
+            document.getElementById('profName').innerText = data.prof;
+            document.getElementById('qrStatus').innerText = data.qr;
+
+            // Insignia de anomalía
+            const anomalyBadge = document.getElementById('anomalyBadge');
+            anomalyBadge.innerText = data.anomalyText;
+            anomalyBadge.className = "px-2.5 py-1 rounded text-xs font-mono font-bold border " + data.anomalyClass;
+
+            // Mensaje de diagnóstico
+            const diagMsg = document.getElementById('diagnosticMsg');
+            diagMsg.className = "font-bold text-xs flex items-center gap-2 mt-0.5 " + data.diagClass;
+            diagMsg.innerHTML = `<i class="fa-solid fa-circle-nodes"></i> ${data.diagText}`;
+
+            // Puntaje de riesgo
+            const riskScore = document.getElementById('riskScore');
+            riskScore.innerText = data.riskText;
+            riskScore.className = "font-extrabold text-xs px-2 py-0.5 rounded border " + data.riskClass;
+
+            // Actualizar elementos del gráfico SVG
+            const rect = document.getElementById('buildingFootprint');
+            rect.setAttribute('x', data.svgBox.x);
+            rect.setAttribute('y', data.svgBox.y);
+            rect.setAttribute('width', data.svgBox.width);
+            rect.setAttribute('height', data.svgBox.height);
+            rect.setAttribute('stroke', data.svgBox.stroke);
+            rect.setAttribute('fill', data.svgBox.fill);
+
+            const text = document.getElementById('footprintText');
+            text.setAttribute('fill', data.svgBox.stroke);
+            text.textContent = data.svgText;
+        }
+
+        // Decisiones del Analista Innova
+        function approveInvestment() {
+            const selected = document.getElementById('caseSelector').value;
+            const data = cases[selected];
+
+            const certBody = document.getElementById('certBody');
+            certBody.innerHTML = `
+                <div class="flex items-center justify-between text-axioma-green border-b border-slate-800 pb-2 font-bold">
+                    <span>ESTADO: APROBADO PARA FINANCIAMIENTO</span>
+                    <i class="fa-solid fa-circle-check text-lg"></i>
+                </div>
+                <p class="text-gray-300">Se certifica la validez inmutable del plano catastral consultado para el <strong>Fondo de Inversión Innova</strong>.</p>
+                <div class="space-y-1 text-gray-400">
+                    <div>• Expediente: <span class="text-white">${data.exp}</span></div>
+                    <div>• Hash de Origen: <span class="text-axioma-cyan break-all">${data.sha256}</span></div>
+                    <div>• Coincidencia Gemelo Digital 3DGS: <span class="text-axioma-green font-bold">100% Conforme</span></div>
+                    <div>• Sello de Inmutabilidad Transfronteriza: <span class="text-white">Anclado en Registro Distribuido</span></div>
+                </div>
+            `;
+
+            document.getElementById('certModal').classList.remove('hidden');
+        }
+
+        function rejectInvestment() {
+            const selected = document.getElementById('caseSelector').value;
+            const data = cases[selected];
+
+            const certBody = document.getElementById('certBody');
+            certBody.innerHTML = `
+                <div class="flex items-center justify-between text-axioma-red border-b border-slate-800 pb-2 font-bold">
+                    <span>ESTADO: RECHAZADO POR RIESGO CATASTRAL</span>
+                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                </div>
+                <p class="text-gray-300">Se emite alerta de retención de desembolso para el <strong>Fondo de Inversión Innova</strong> debido a discrepancias físicas vs. registro.</p>
+                <div class="space-y-1 text-gray-400">
+                    <div>• Expediente: <span class="text-white">${data.exp}</span></div>
+                    <div>• Hash de Origen: <span class="text-axioma-cyan break-all">${data.sha256}</span></div>
+                    <div>• Anomalía Superficial Detectada: <span class="text-axioma-red font-bold">${data.anomalyText}</span></div>
+                    <div>• Acción Recomendada: <span class="text-white">Detener liberación de fondos hasta regularización en Geodesia</span></div>
+                </div>
+            `;
+
+            document.getElementById('certModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('certModal').classList.add('hidden');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3200);
+        }
+    </script>
+</body>
+</html>
